@@ -7,10 +7,6 @@ import { Component } from '@angular/core';
   styleUrl: './alert.scss',
 })
 export class Alert {
-  firstName = 'Angular';
-
-  firstNameAvailables = ['Angular', 'React', 'Vue', 'Svelte'];
-
   alertClickedNumber = 0;
 
   public alert(): void {
@@ -18,7 +14,7 @@ export class Alert {
     this.alertClickedNumber++;
   }
 
-  public changeFirstName(newName: string): void {
-    this.firstName = newName;
+  public isOdd(num: number): boolean {
+    return num % 2 !== 0;
   }
 }

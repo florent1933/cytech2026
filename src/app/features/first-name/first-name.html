@@ -1,0 +1,10 @@
+{{ firstName }}
+
+@for (name of firstNameAvailables; track $index) {
+<button
+  (click)="changeFirstName(name)"
+  [style.textDecoration]="name === firstName ? 'underline' : 'none'"
+>
+  {{ name }}
+</button>
+}
