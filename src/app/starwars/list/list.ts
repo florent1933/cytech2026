@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
-import { map } from 'rxjs';
+import { flattenDeep, uniq } from 'lodash';
+import { BehaviorSubject, combineLatest, map, share } from 'rxjs';
 
 interface Result<T> {
   count: number;
@@ -36,7 +37,31 @@ interface Planet {
 export class List {
   private http = inject(HttpClient);
 
-  planets$ = this.http
-    .get<Result<Planet>>('https://swapi.dev/api/planets/')
-    .pipe(map((res) => res.results));
+  selectedFilter = new BehaviorSubject<string | null>(null);
+
+  planets$ = this.http.get<Result<Planet>>('https://swapi.dev/api/planets').pipe(
+    map((res) => res.results),
+    share()
+  );
+
+  terrainTypes$ = this.planets$.pipe(
+    map((planets) => {
+      const terrains = planets.map((planet) => {
+        let terrainsOfThePlanet = planet.terrain.split(', ');
+        return terrainsOfThePlanet;
+      });
+
+      const uniqueTerrains = uniq(flattenDeep(terrains));
+      return uniqueTerrains;
+    })
+  );
+
+  filteredPlanets$ = combineLatest([this.planets$, this.selectedFilter]).pipe(
+    map(([planets, selectedFilter]) => {
+      if (!selectedFilter) {
+        return planets;
+      }
+      return planets.filter((planet) => planet.terrain.includes(selectedFilter));
+    })
+  );
 }
