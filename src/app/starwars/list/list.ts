@@ -51,13 +51,20 @@ export class List {
 
   terrainTypes$ = this.planets$.pipe(
     map((planets) => {
-      const terrains = planets.map((planet) => {
-        let terrainsOfThePlanet = planet.terrain.split(', ');
-        return terrainsOfThePlanet;
+      const terrains = flattenDeep(planets.map((planet) => planet.terrain.split(', ')));
+      const uniqueTerrains = uniq(terrains);
+
+      const normalizedTerrains = uniqueTerrains.map((terrain) => {
+        if (terrain.endsWith('s')) {
+          const singular = terrain.slice(0, -1);
+          if (uniqueTerrains.includes(singular)) {
+            return singular;
+          }
+        }
+        return terrain;
       });
 
-      const uniqueTerrains = uniq(flattenDeep(terrains));
-      return uniqueTerrains;
+      return uniq(normalizedTerrains).sort();
     })
   );
 
