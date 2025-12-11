@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { flattenDeep, uniq } from 'lodash';
-import { BehaviorSubject, combineLatest, map, share } from 'rxjs';
+import { BehaviorSubject, combineLatest, delay, EMPTY, expand, map, scan, share } from 'rxjs';
 
 interface Result<T> {
   count: number;
@@ -40,7 +40,9 @@ export class List {
   selectedFilter = new BehaviorSubject<string | null>(null);
 
   planets$ = this.http.get<Result<Planet>>('https://swapi.dev/api/planets').pipe(
+    expand((res) => (res.next ? this.http.get<Result<Planet>>(res.next).pipe(delay(5000)) : EMPTY)),
     map((res) => res.results),
+    scan((acc, curr) => acc.concat(curr), [] as Planet[]),
     share()
   );
 
